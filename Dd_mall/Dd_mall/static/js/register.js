@@ -88,7 +88,6 @@ let vm = new Vue({
             if (re2.test(this.phone_num)) {
                 this.error_phone_num = false;
             } else {
-                alert(this.phone_num);
                 this.error_phone_num_message = '手机号位数不正确';
                 this.error_phone_num = true;
             }

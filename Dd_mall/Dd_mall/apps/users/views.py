@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django import http
 import re
+from .models import User
+from django.db import DatabaseError
 
 # Create your views here.
 from django.views import View
@@ -38,3 +40,9 @@ class RegisterView(View):
 
         if allow != 'on':
             return http.HttpResponseForbidden('请勾选用户协议')
+        try:
+            User.objects.create_user(username=username, password=password1, mobile=mobile)
+        except DatabaseError:
+            return render(request, 'register.html', {'register_errmsg', '注册失败'})
+
+        return http.HttpResponse('注册成功')
