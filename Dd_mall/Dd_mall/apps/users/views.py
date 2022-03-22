@@ -1,11 +1,30 @@
-from django.shortcuts import render
+import logging
+
+from django.shortcuts import render, redirect
 from django import http
 import re
 from .models import User
 from django.db import DatabaseError
+from django.urls import reverse
+from django.contrib.auth import login
 
 # Create your views here.
 from django.views import View
+from Dd_mall.utils.response_code import RETCODE, err_msg
+
+
+class CheckUsernameRepeatView(View):
+    def get(self, request, username):
+        """校验用户名是否重复"""
+        count = User.objects.filter(username=username).count()
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': err_msg.get(RETCODE.OK), 'count': count})
+
+
+class CheckMobileRepeatView(View):
+    def get(self, request, num):
+        """校验手机号是否重复"""
+        count = User.objects.filter(mobile=num).count()
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': err_msg.get(RETCODE.OK), 'count': count})
 
 
 class RegisterView(View):
@@ -41,8 +60,10 @@ class RegisterView(View):
         if allow != 'on':
             return http.HttpResponseForbidden('请勾选用户协议')
         try:
-            User.objects.create_user(username=username, password=password1, mobile=mobile)
+            user = User.objects.create_user(username=username, password=password1, mobile=mobile)
         except DatabaseError:
-            return render(request, 'register.html', {'register_errmsg', '注册失败'})
+            return render(request, 'register.html', {'register_errmsg': '注册失败'})
 
-        return http.HttpResponse('注册成功')
+        login(request, user)
+
+        return redirect(reverse('contents:index'))

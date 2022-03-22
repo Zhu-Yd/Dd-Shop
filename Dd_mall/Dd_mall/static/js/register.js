@@ -41,6 +41,26 @@ let vm = new Vue({
                 this.error_name = true;
             }
 
+            if (this.error_name == false) {
+                let url = '/usernames/' + this.username + '/count/';
+                axios.get(url, {
+                    responseType: 'json'
+                })
+                    .then(response => {
+                        if (response.data.count == 1) {
+                            console.log(response)
+                            this.error_name_message = '用户名已存在';
+                            this.error_name = true;
+                        } else {
+                            this.error_name = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error.response)
+                    })
+
+            }
+
         },
         check_password1() {
             let re = /^[a-zA-Z0-9]{8,20}$/;
@@ -90,6 +110,26 @@ let vm = new Vue({
             } else {
                 this.error_phone_num_message = '手机号位数不正确';
                 this.error_phone_num = true;
+            }
+
+            if (this.error_phone_num == false) {
+                let url = '/mobile/' + this.phone_num + '/count/';
+                axios.get(url, {
+                    responseType: 'json'
+                })
+                    .then(response => {
+                        if (response.data.count == 1) {
+                            console.log(response)
+                            this.error_phone_num_message = '手机号已存在';
+                            this.error_phone_num = true;
+                        } else {
+                            this.error_phone_num = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error.response)
+                    })
+
             }
         },
         check_allow() {
