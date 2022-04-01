@@ -20,4 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^', include(('Dd_mall.apps.users.urls', 'users'))),
     re_path(r'^', include(('Dd_mall.apps.contents.urls', 'contents'))),
+    re_path(r'^', include('Dd_mall.apps.verifications.urls')),
+
 ]

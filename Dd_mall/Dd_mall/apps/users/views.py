@@ -7,6 +7,7 @@ from .models import User
 from django.db import DatabaseError
 from django.urls import reverse
 from django.contrib.auth import login
+from django_redis import get_redis_connection
 
 # Create your views here.
 from django.views import View
@@ -24,6 +25,9 @@ class CheckMobileRepeatView(View):
     def get(self, request, num):
         """校验手机号是否重复"""
         count = User.objects.filter(mobile=num).count()
+        if count == 1:
+            redis_coon = get_redis_connection('verify_code')
+            redis_coon.setex('r_%s' % num, 360, '1')
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': err_msg.get(RETCODE.OK), 'count': count})
 
 
@@ -40,6 +44,7 @@ class RegisterView(View):
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         mobile = request.POST.get('mobile')
+        sms_code = request.POST.get('sms_code')
         allow = request.POST.get('allow')
 
         if not all([username, password1, password2, mobile, allow]):
@@ -56,6 +61,14 @@ class RegisterView(View):
 
         if not re.match(r'^1[3-9]\d{9}$', mobile):
             return http.HttpResponseForbidden('手机号码不合法')
+
+        redis_coon = get_redis_connection('verify_code')
+        sms_code_server = redis_coon.get('sms_%s' % mobile)
+        if sms_code_server is None:
+            return render(request, 'register.html', {'register_errmsg': '短信验证码已失效'})
+
+        if not (sms_code.lower() == sms_code.lower()):
+            return render(request, 'register.html', {'register_errmsg': '短信验证码输入有误'})
 
         if allow != 'on':
             return http.HttpResponseForbidden('请勾选用户协议')
