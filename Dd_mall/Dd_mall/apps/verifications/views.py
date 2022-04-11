@@ -7,6 +7,7 @@ import logging, random
 from Dd_mall.apps.verifications.libs.captcha.captcha import captcha
 from . import constants
 from Dd_mall.utils.response_code import RETCODE, err_msg
+from celery_tasks.sms_code.tasks import send_sms_code
 from .libs.sms.rly_sms_SDK.sendSms import CCP
 
 logger = logging.getLogger('django')
@@ -39,8 +40,8 @@ class SmsCodeView(View):
         logger.info('sms_' + mobile + ':' + sms_code)
         redis_conn.setex('sms_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, '1')
         redis_conn.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
-        CCP().send_message(constants.SEND_SMS_TEMPLATE_ID, mobile, (sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60))
-
+        # CCP().send_message(constants.SEND_SMS_TEMPLATE_ID, mobile, (sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60))
+        send_sms_code.delay(mobile, sms_code)
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'null'})
 
 
