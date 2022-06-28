@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'Dd_mall.apps.users',
     'Dd_mall.apps.contents',
     'Dd_mall.apps.verifications',
+    'Dd_mall.apps.oauth',
+
 ]
 
 MIDDLEWARE = [
@@ -59,7 +61,7 @@ TEMPLATES = [
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
-            'environment': 'Dd_mall.utils.jinja_env.environment', # 添加已修改过的环境变量
+            'environment': 'Dd_mall.utils.jinja_env.environment',  # 添加已修改过的环境变量
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -166,8 +168,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#配置工作日誌
-LOGGING={
+# 配置工作日誌
+LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
@@ -211,4 +213,12 @@ LOGGING={
 
 # 指定自定义的用户模型类
 AUTH_USER_MODEL = 'users.User'
+# 配置自定义用户认证后端
+AUTHENTICATION_BACKENDS = ["Dd_mall.apps.users.utils.MtiLoginBackend"]
+# 默认登录地址
+LOGIN_URL = '/login/'
 
+# QQ登录参数
+QQ_CLIENT_ID = '101474184'
+QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'

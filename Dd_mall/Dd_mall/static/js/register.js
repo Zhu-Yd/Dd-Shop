@@ -89,8 +89,14 @@ let vm = new Vue({
         check_username() {
             //用户名是5-20个字符，[a-zA-Z0-9_-]
             let re = /^[a-zA-Z0-9_-]{5,20}$/;
+            let re2=/^\d+$/
             if (this.username == '') {
                 this.error_name_message = '用户名不能为空';
+                this.error_name = true;
+                return;
+            }
+            if(re2.test(this.username)){
+                this.error_name_message = '用户名不能为纯数字';
                 this.error_name = true;
                 return;
             }

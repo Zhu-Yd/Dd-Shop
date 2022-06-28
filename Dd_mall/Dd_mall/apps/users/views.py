@@ -6,12 +6,60 @@ import re
 from .models import User
 from django.db import DatabaseError
 from django.urls import reverse
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from django_redis import get_redis_connection
-
-# Create your views here.
 from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from Dd_mall.utils.response_code import RETCODE, err_msg
+from . import constants
+
+
+class UserinfoView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'user_center_info.html')
+
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        response = redirect(reverse('contents:index'))
+        response.delete_cookie('username')
+        return response
+
+
+class LoginView(View):
+    def get(self, request):
+        return render(request, 'login.html')
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remembered = request.POST.get('remembered')
+        if not all([username, password]):
+            return http.HttpResponseForbidden('参数错误')
+        if not re.match(r'^[0-9A-Za-z_-]{5,20}$', username):
+            return http.HttpResponseForbidden('参数错误')
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
+            return http.HttpResponseForbidden('参数错误')
+
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return render(request, 'login.html', {'login_errmsg': '账号或密码错误'})
+        else:
+            login(request, user)
+            if remembered == 'on':
+                request.session.set_expiry(0)
+            else:
+                request.session.set_expiry(None)
+
+        next = request.GET.get('next')
+        if next:
+            response = redirect(next)
+        else:
+            response = redirect(reverse('contents:index'))
+        response.set_cookie('username', user.username, constants.USERNAME_EXPIRES)
+        return response
 
 
 class CheckUsernameRepeatView(View):
@@ -53,6 +101,9 @@ class RegisterView(View):
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
             return http.HttpResponseForbidden('用户名不合法')
 
+        if re.match(r'^\d+$', username):
+            return http.HttpResponseForbidden('用户名不能为纯数字')
+
         if not re.match(r'^[a-zA-Z0-9]{8,20}$', password1):
             return http.HttpResponseForbidden('密码不合法')
 
@@ -79,4 +130,6 @@ class RegisterView(View):
 
         login(request, user)
 
-        return redirect(reverse('contents:index'))
+        response = redirect(reverse('contents:index'))
+        response.set_cookie('username', user.username, constants.USERNAME_EXPIRES)
+        return response
