@@ -53,7 +53,7 @@ class LoginView(View):
             else:
                 request.session.set_expiry(None)
 
-        next=request.GET.get('next')
+        next = request.GET.get('next')
         if next:
             response = redirect(next)
         else:
@@ -100,6 +100,9 @@ class RegisterView(View):
 
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
             return http.HttpResponseForbidden('用户名不合法')
+
+        if re.match(r'^\d+$', username):
+            return http.HttpResponseForbidden('用户名不能为纯数字')
 
         if not re.match(r'^[a-zA-Z0-9]{8,20}$', password1):
             return http.HttpResponseForbidden('密码不合法')

@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'Dd_mall.apps.users',
     'Dd_mall.apps.contents',
     'Dd_mall.apps.verifications',
+    'Dd_mall.apps.oauth',
+
 ]
 
 MIDDLEWARE = [
@@ -215,3 +217,8 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ["Dd_mall.apps.users.utils.MtiLoginBackend"]
 # 默认登录地址
 LOGIN_URL = '/login/'
+
+# QQ登录参数
+QQ_CLIENT_ID = '101474184'
+QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'

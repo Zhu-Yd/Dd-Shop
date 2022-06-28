@@ -47,6 +47,8 @@ let vm = new Vue({
                 responseType: 'json'
             })
                 .then(response => {
+                    console.log(response);
+
                     location.href = response.data.login_url;
                 })
                 .catch(error => {
