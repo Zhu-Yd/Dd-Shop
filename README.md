@@ -1,1 +1,1 @@
-This is a web shop！
+This is a Django web shop project！
